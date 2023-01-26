@@ -1,0 +1,21 @@
+---
+- name: python 모듈 설치
+  hosts: clients
+  tasks:
+  - name: requirement 파일 전송
+    copy:
+      src: ../crawl/requirement.txt
+      dest: ~/crawl
+      force: true
+  - name: 가상환경 삭제
+    file:
+      path: ~/crawl/venv
+      state: absent
+  - name: 가상환경 새로 생성
+    command: python3 -m venv ~/crawl/venv
+    args:
+      creates: ~/crawl/venv
+  - name: 파이썬 모듈 설치
+    ansible.builtin.pip:
+      requirements: ~/crawl/requirement.txt
+      virtualenv: ~/crawl/venv
