@@ -1,0 +1,24 @@
+---
+- name: 카테고리 목록 크롤
+  hosts: client1
+  tasks:
+  - name: 파이썬 스크립트 전송
+    copy:
+      src: ../crawl/category.py
+      dest: /home/ec2-user/crawl
+      force: true
+
+  - name: 파이썬 스크립트 전송
+    copy:
+      src: ../crawl/commons.py
+      dest: /home/ec2-user/crawl
+      force: true
+
+  - name: 파이썬 스크립트 전송
+    copy:
+      src: ../crawl/targets.py
+      dest: /home/ec2-user/crawl
+      force: true
+      
+  - name: 스크립트 실행
+    shell: /home/ec2-user/crawl/venv/bin/python3 /home/ec2-user/crawl/category.py
