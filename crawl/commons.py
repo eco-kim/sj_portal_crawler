@@ -1,5 +1,5 @@
 import boto3
-from sqlalchemy import create_engine, types as sqltypes
+from sqlalchemy import create_engine
 import requests
 from bs4 import BeautifulSoup as Soup
 import pandas as pd
@@ -32,10 +32,3 @@ def getSoup(url):
     else:
         soup = Soup(response.content.decode('utf8','replace'), 'html.parser')
     return soup
-
-categoryColumns = ['id','title','parent_id','root_id','uri']
-categoryDtypes = {'id': sqltypes.INTEGER(),
-                'title': sqltypes.VARCHAR(50),
-                'parent_id':sqltypes.INTEGER(),
-                'root_id':sqltypes.INTEGER(),
-                'uri': sqltypes.VARCHAR(100)}

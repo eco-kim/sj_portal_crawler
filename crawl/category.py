@@ -81,3 +81,7 @@ def uploadTable(df):
 if __name__=='__main__':
     uploadTable(naviMro())
     uploadTable(labsMro())
+
+
+#업데이트시 레거시 테이블 어떻게 처리할지 생각해야함.
+#1안 : s3에 업로드(append) 2안 : 검색 인덱스 업데이트 완료 시 삭제
