@@ -1,0 +1,91 @@
+---
+- name: airflow 설치 및 db 연결
+  hosts: clients
+  tasks:
+  - name: 가상환경 삭제
+    file:
+      path: ~/airflow/venv
+      state: absent
+
+  - name: bashrc 수정
+    lineinfile: 
+      path: ~/.bashrc
+      line: export AIRFLOW_HOME=$HOME/airflow
+
+  - name: bashrc 적용
+    shell: source ~/.bashrc
+
+  - name: 링크 연결
+    become: true
+    file:
+      src: /usr/bin/python3.7
+      dest: /usr/bin/python3
+      state: link
+      force: yes
+  
+  - name: 링크 연결
+    become: true
+    file:
+      src: /usr/bin/pip3
+      dest: /usr/bin/pip
+      state: link
+      force: yes
+
+  - name: mysql 라이브러리 설치
+    become: true
+    yum:
+      name: mysql-devel
+      state: present
+
+  - name: python-devel 설치
+    become: true
+    yum:
+      name: python3-devel
+      state: present
+
+  - name: gcc 설치
+    become: true
+    yum:
+      name: gcc
+      state: present
+
+  - name: pip 업그레이드
+    pip:
+      name: pip
+      state: latest
+
+  - name: wheel 설치
+    pip:
+      name: wheel
+      state: present
+
+
+##system python이랑 버전 꼬여서 동작안함.
+##수정 필요
+  - name: mysql client 설치
+    ansible.builtin.pip:
+      name: mysqlclient
+      state: latest
+
+  - name: redis 설치
+    ansible.builtin.pip:
+      name: redis
+
+  - name: 글로벌로 airflow 설치
+    ansible.builtin.pip:
+      name: apache-airflow[celery]
+      chdir: ~/airflow
+      state: latest
+
+  - name: config 수정
+    lineinfile:
+      dest: ~/airflow/airflow.cfg
+      regexp: '^sql_alchemy_conn\s+'
+      line: sql_alchemy_conn = mysql://smartjack:workandplay1!@research-master.cvtkhht2fxds.ap-northeast-2.rds.amazonaws.com:3306/airflow
+
+  - name: db init
+    shell: airflow db init
+
+
+##system python이랑 버전 꼬여서 동작안함.
+##수정 필요

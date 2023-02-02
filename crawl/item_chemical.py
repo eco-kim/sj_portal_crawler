@@ -1,4 +1,5 @@
-from commons import mysqlEngine, getSoup
+import commons
+from commons import s3Client, mysqlEngine, getSoup
 import pandas as pd
 from sqlalchemy import types as sqltypes
 import requests
@@ -28,8 +29,13 @@ def selectChemicalCategory():
     del(category)
     return df
 
+def thumbnailUpload(img_data, key):
+    s3.put_object(
+    Bucket=commons.bucket_thumbnail,
+    Key=key,
+    Body=img_data)
 
-def naviMro(category_info, image=False):
+def naviMro(category_info, image=False):    
     category_id = category_info['id']
     url = category_info['uri_root']+category_info['uri']
     soup = getSoup(url)
@@ -53,16 +59,17 @@ def naviMro(category_info, image=False):
                 rst['valid'] = 0
             else:
                 rst['valid'] = 1    
-            
-            img = item.find_all('img', {'class':'grid-img'})[0]
-            uri = img['src']    
-            img_name = uri.split('/')[-1]
-            code = img_name.split('.')[0]
+
+            if image:
+                img = item.find_all('img', {'class':'grid-img'})[0]
+                uri = img['src']    
+                img_name = uri.split('/')[-1]
+                code = img_name.split('.')[0]
+                img_data = requests.get('https:'+uri).content
             rst['code'] = code
             
-            if image:
-                img_data = requests.get('https:'+uri).content
+                
 
-                ##s3 업로드 내일작성
 
 categories = selectChemicalCategory()
+s3 = s3Client()

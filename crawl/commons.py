@@ -18,7 +18,8 @@ def mysqlEngine():
 ##s3
 accesskey = 'AKIAJTHZ7J76SPC4AVNQ'
 secretkey = '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'
-bucket = 'smartjack-master-database'
+bucket_thumbnail = 'portal-item-thumbnail'
+bucket_info = 'portal-item-info'
 
 def s3Client():
     return boto3.client('s3',aws_access_key_id=accesskey, aws_secret_access_key=secretkey)
