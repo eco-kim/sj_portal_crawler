@@ -2,6 +2,11 @@
 - name: airflow 설치 및 db 연결
   hosts: clients
   tasks:
+
+  - name: 파이썬 버전 지정
+    set_fact:
+      interpreter: /usr/bin/python3.8
+
   - name: 가상환경 삭제
     file:
       path: ~/airflow/venv
@@ -18,7 +23,7 @@
   - name: 링크 연결
     become: true
     file:
-      src: /usr/bin/python3.7
+      src: /usr/bin/python3.8
       dest: /usr/bin/python3
       state: link
       force: yes
@@ -33,6 +38,8 @@
 
   - name: mysql 라이브러리 설치
     become: true
+    vars:
+      ansible_python_interpreter: "{{ interpreter }}"
     yum:
       name: mysql-devel
       state: present
@@ -40,52 +47,64 @@
   - name: python-devel 설치
     become: true
     yum:
-      name: python3-devel
+      name: python38-devel
       state: present
+    vars:
+      ansible_python_interpreter: "{{ interpreter }}"
 
   - name: gcc 설치
     become: true
     yum:
       name: gcc
       state: present
+    vars:
+      ansible_python_interpreter: "{{ interpreter }}"
 
   - name: pip 업그레이드
     pip:
       name: pip
       state: latest
+    vars:
+      ansible_python_interpreter: "{{ interpreter }}"
 
   - name: wheel 설치
     pip:
       name: wheel
       state: present
+    vars:
+      ansible_python_interpreter: "{{ interpreter }}"
 
-
-##system python이랑 버전 꼬여서 동작안함.
-##수정 필요
   - name: mysql client 설치
     ansible.builtin.pip:
       name: mysqlclient
       state: latest
+    vars:
+      ansible_python_interpreter: "{{ interpreter }}"
 
   - name: redis 설치
     ansible.builtin.pip:
       name: redis
+    vars:
+      ansible_python_interpreter: "{{ interpreter }}"
 
   - name: 글로벌로 airflow 설치
     ansible.builtin.pip:
       name: apache-airflow[celery]
       chdir: ~/airflow
       state: latest
+    vars:
+      ansible_python_interpreter: "{{ interpreter }}"
 
-  - name: config 수정
+  - name: config 수정 (db)
     lineinfile:
       dest: ~/airflow/airflow.cfg
       regexp: '^sql_alchemy_conn\s+'
-      line: sql_alchemy_conn = mysql://smartjack:workandplay1!@research-master.cvtkhht2fxds.ap-northeast-2.rds.amazonaws.com:3306/airflow
+      line: sql_alchemy_conn = mysql://smartjack:workandplay1!@research-master.cvtkhht2fxds.ap-northeast-2.rds.amazonaws.com:3306/airflow?charset=utf8
+
+  - name: config 수정 (redis)
+    lineinfile:
 
   - name: db init
-    shell: airflow db init
-
-
-##system python이랑 버전 꼬여서 동작안함.
-##수정 필요
+    shell: ~/.local/bin/airflow db init
+    args: 
+      chdir: ~/airflow
