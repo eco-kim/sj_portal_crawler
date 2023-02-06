@@ -101,10 +101,19 @@
       regexp: '^sql_alchemy_conn\s+'
       line: sql_alchemy_conn = mysql://smartjack:workandplay1!@research-master.cvtkhht2fxds.ap-northeast-2.rds.amazonaws.com:3306/airflow?charset=utf8
 
+  - name: config 수정 (executor)
+    lineinfile:
+      dest: ~/airflow/airflow.cfg
+      regexp: '^executor = \s+'
+      line: executor = CeleryExecutor
+
   - name: config 수정 (redis)
     lineinfile:
+      dest: ~/airflow/airflow.cfg
+      regexp: '^broker_url = \s+'
+      line: broker_url = redis://ubuntu@43.201.24.126:6397/0
 
   - name: db init
     shell: ~/.local/bin/airflow db init
-    args: 
+    args:
       chdir: ~/airflow
