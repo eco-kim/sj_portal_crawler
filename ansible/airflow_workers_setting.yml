@@ -104,13 +104,13 @@
   - name: config 수정 (executor)
     lineinfile:
       dest: ~/airflow/airflow.cfg
-      regexp: '^executor = \s+'
+      regexp: '^executor\s+'
       line: executor = CeleryExecutor
 
   - name: config 수정 (redis)
     lineinfile:
       dest: ~/airflow/airflow.cfg
-      regexp: '^broker_url = \s+'
+      regexp: '^broker_url\s+'
       line: broker_url = redis://ubuntu@43.201.24.126:6397/0
 
   - name: db init
