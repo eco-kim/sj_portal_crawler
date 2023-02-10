@@ -1,0 +1,29 @@
+---
+- name: selenium 세팅
+  hosts: clients
+  tasks:
+
+  - name: 파이썬 버전 지정
+    set_fact:
+      interpreter: /usr/bin/python3.8
+
+  - name: mysql 라이브러리 설치
+    become: true
+    vars:
+      ansible_python_interpreter: "{{ interpreter }}"
+    yum:
+      name: xorg-x11-server-Xvfb
+      state: present
+
+  - name: 셀레니움 설치
+    pip:
+      name: selenium==4.8.0
+      state: present
+      virtualenv: ~/crawl/venv
+  
+  - name: 가상디스플레이 설치
+    pip:
+      name: pyvirtualdisplay==3.0
+      state: present
+      virtualenv: ~/crawl/venv
+
