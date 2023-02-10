@@ -27,3 +27,18 @@
       state: present
       virtualenv: ~/crawl/venv
 
+  - name: 크롬 설치
+    shell: curl https://intoli.com/install-google-chrome.sh | bash
+    become: true
+
+  - name: 크롬 드라이버 설치
+    get_url:
+      url: https://chromedriver.storage.googleapis.com/110.0.5481.77/chromedriver_linux64.zip
+      dest: ~/crawl
+
+  - name: 압축해제
+    unarchive:
+      src: ~/crawl/chromedriver_linux64.zip
+      dest: ~/crawl
+      remote_src: yes
+
