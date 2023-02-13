@@ -1,11 +1,12 @@
 import commons
-from commons import s3Client, mysqlEngine, getSoup
+from commons import s3Client, mysqlEngine, getSoup, seleniumWindow, goToBottom, findtext
 import pandas as pd
 from sqlalchemy import types as sqltypes
 import requests
+from selenium.webdriver.common.by import By
 
 def selectChemicalCategory():
-    keywords = ['시약'] ##키워드 추가 예정, 아예 시약회사들은 함수 따로 분리 예정
+    keywords = ['시약', 'Chemicals','Antibodies','Merck'] ##키워드 추가 예정, 아예 시약회사들은 함수 따로 분리 예정
     key_excepts = ['시약장'] 
     query = "select * from portal.portal_item_category"
     engine = mysqlEngine()
@@ -67,9 +68,31 @@ def naviMro(category_info, image=False):
                 code = img_name.split('.')[0]
                 img_data = requests.get('https:'+uri).content
             rst['code'] = code
-            
-                
 
+def parseSeleniumItem(item, catid):
+    href = item.get_attribute('href')
+    title = findtext(item, 'title')
+    brand = findtext(item, "brand-name")
+    price = findtext(item, 'price')
+    try:
+        imgurl = item.find_element(By.CLASS_NAME, "thumbnail-wrapper").get_attribute('style')
+    except:
+        imgurl = None
+    return [title, brand, price, href, imgurl, catid]
 
+def cacheby(category_info, image=False):
+    rst = []
+    category_id = category_info['id']
+    url = category_info['uri_root']+category_info['uri']
+    driver = seleniumWindow(url)
+    goToBottom(driver)
+    items = driver.find_elements(By.CLASS_NAME, "ProductCard")
+
+    for i, item in enumerate(items):
+        rst.append(parseSeleniumItem(item,category_id))
+    driver.quit()
+
+    return rst
+                    
 categories = selectChemicalCategory()
 s3 = s3Client()
