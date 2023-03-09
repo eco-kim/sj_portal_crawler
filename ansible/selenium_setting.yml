@@ -42,3 +42,9 @@
       dest: ~/crawl
       remote_src: yes
 
+  - name: driver manager 설치
+    pip:
+      name: webdriver_manager
+      state: present
+      virtualenv: ~/crawl/venv
+

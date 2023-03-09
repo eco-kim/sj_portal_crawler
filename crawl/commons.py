@@ -3,6 +3,7 @@ from sqlalchemy import create_engine, inspect
 import requests
 from bs4 import BeautifulSoup as Soup
 import pandas as pd
+import json
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -17,11 +18,11 @@ from numpy import random
 
 ##mysql
 sql = 'mysql+pymysql'
-host = 'research-master.cvtkhht2fxds.ap-northeast-2.rds.amazonaws.com'
+host = 
 port = 3306
-db = 'ncbi'
-user = 'smartjack'
-passwd = 'workandplay1!'
+db = 
+user = 
+passwd = 
 
 def mysqlEngine():
     return create_engine(f'{sql}://{user}:{passwd}@{host}/{db}')
@@ -35,13 +36,25 @@ def loadDataType(engine, schema, table):
     return dtypes
 
 ##s3
-accesskey = 'AKIAJTHZ7J76SPC4AVNQ'
-secretkey = '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'
+accesskey = 
+secretkey = 
 bucket_thumbnail = 'portal-item-thumbnail'
 bucket_info = 'portal-item-info'
 
 def s3Client():
     return boto3.client('s3',aws_access_key_id=accesskey, aws_secret_access_key=secretkey)
+
+def s3Upload(rst, category_id, num):
+    s3 = s3Client()
+    fname = f'category_{str(category_id).zfill(5)}_{str(num).zfill(4)}.json'
+    temp = {'category_id':category_id,
+            'values':rst}
+    temp = bytes(json.dumps(temp).encode('utf-8'))
+    s3.put_object(
+            Bucket=bucket_info,
+            Key=fname,
+            Body=temp)
+    s3.close()
 
 ##beautiful soup
 def getSoup(url):
@@ -58,8 +71,7 @@ def setOptions():
     options = Options()
     options.add_argument('--headless')
     options.add_argument('--mute-audio')
-    options.add_argument('--lang=de')
-    options.add_argument('--window-size=800,600')
+    options.add_argument('--window-size=1200,800')
     options.add_argument('--disable-notifications')
     options.add_argument('--enable-popup-blocking')
     return options
@@ -85,10 +97,3 @@ def goToBottom(driver):
             break
 
         last_height = new_height    
-
-def findtext(item, classname):
-    try:
-        temp = item.find_element(By.CLASS_NAME, classname)
-    except:
-        return None
-    return temp.text

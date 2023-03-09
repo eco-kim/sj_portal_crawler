@@ -1,0 +1,15 @@
+---
+- name: airflow 설치 및 db 연결
+  hosts: clients
+  tasks:
+
+  - name: config 수정 (result_backend)
+    lineinfile:
+      dest: ~/airflow/airflow.cfg
+      regexp: '^# result_backend\s+'
+      line: result_backend = db+mysql://{user}:{passwd}@{host}:{port}/airflow?charset=utf8
+
+  - name: db init
+    shell: ~/.local/bin/airflow db init
+    args:
+      chdir: ~/airflow

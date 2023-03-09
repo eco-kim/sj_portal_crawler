@@ -1,0 +1,19 @@
+---
+- name: 캐시바이 스크립트 전송
+  hosts: master
+  tasks:
+  - name: 파이썬 스크립트 전송
+    copy:
+      src: ../crawl/commons.py
+      dest: /home/ubuntu/crawl
+      force: true
+  - name: requirements
+    copy:
+      src: ../crawl/requirement.txt
+      dest: /home/ubuntu/crawl
+      force: true
+  - name: commons
+    copy:
+      src: ../crawl/commons.py
+      dest: /home/ubuntu/crawl
+      force: true

@@ -1,0 +1,9 @@
+---
+- name: 캐시바이 스크립트 전송
+  hosts: client1
+  tasks:
+  - name: 파이썬 스크립트 전송
+    copy:
+      src: ../crawl/cacheby_option.py
+      dest: /home/ec2-user/crawl
+      force: true
