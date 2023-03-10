@@ -1,17 +1,9 @@
 [clients]
-client1 ansible_host=3.34.142.86
-client2 ansible_host=43.201.55.165
-client3 ansible_host=3.38.97.91
-client4 ansible_host=3.34.131.60
-client5 ansible_host=54.180.126.134
-client6 ansible_host=52.78.53.221
-client7 ansible_host=54.180.135.174
-client8 ansible_host=13.125.197.208
-client9 ansible_host=13.125.233.120
-client10 ansible_host=13.125.218.222
+client1 ansible_host=
+
 
 [master]
-crawler ansible_host=13.209.13.249
+crawler ansible_host=
 
 [clients:vars]
 ansible_port=22

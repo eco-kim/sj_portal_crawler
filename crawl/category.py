@@ -1,5 +1,6 @@
-from commons import mysqlEngine, getSoup
-from targets import targets
+from commons.mysql import mysqlEngine
+from commons.bs import getSoup
+from commons.targets import targets
 import pandas as pd
 from sqlalchemy import types as sqltypes
 
@@ -33,8 +34,8 @@ class categoryCrawler:
         self.idx[depth] += 1
         return [idx,name,parent,self.root,uri,None]    
 
-def naviMro():
-    crawler = categoryCrawler('(주)나비엠알오')
+def shop1():
+    crawler = categoryCrawler('shop1')
     reflist = crawler.soup.find_all('div',{'id':'list-category-wrap'})[0].find_all('a')
 
     for l in reflist:
@@ -50,8 +51,8 @@ def naviMro():
     df = df.sort_values(by='id')
     return df
 
-def labsMro():
-    crawler = categoryCrawler("(주)랩스엠알오")
+def shop2():
+    crawler = categoryCrawler("shop2")
     reflist = crawler.soup.find_all('div',{'class':'category'})[0].find_all('a')
 
     depths = {'category_depth1_a':0,
@@ -66,8 +67,8 @@ def labsMro():
     df = df.sort_values(by='id')
     return df
 
-def cacheBy():
-    crawler = categoryCrawler("캐시바이")
+def shop3():
+    crawler = categoryCrawler("shop3")
     reflist = crawler.soup.find_all('a',{'class':'CategorySubItem'})
     depth=0
     for l in reflist:
@@ -94,9 +95,9 @@ def uploadTable(df):
                 index_label='id')
 
 if __name__=='__main__':
-    uploadTable(naviMro())
-    uploadTable(labsMro())
-    uploadTable(cacheBy())
+    uploadTable(shop1())
+    uploadTable(shop2())
+    uploadTable(shop3())
 
 #업데이트시 레거시 테이블 어떻게 처리할지 생각해야함.
 #1안 : s3에 업로드(append) 2안 : 검색 인덱스 업데이트 완료 시 삭제

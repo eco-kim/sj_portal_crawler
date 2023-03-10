@@ -1,4 +1,6 @@
-from commons import mysqlEngine, seleniumWindow, goToBottom, loadDataType
+from commons.mysql import mysqlEngine, loadDataType
+from commons.selenium import seleniumWindow, goToBottom
+
 import pandas as pd
 from selenium.webdriver.common.by import By
 import pickle
@@ -21,9 +23,10 @@ def parseSoupItem(item, catid):
 engine = mysqlEngine()
 
 root_id = 1122
-category_id = [1122,1130,1176,1286]
+category_id = [1122,1130,1176,1286] ##chemicals 우선순위, 추후 전체카테고리로 확장
+
 cats = list(map(str, category_id))
-tablename = 'cacheby_items'
+tablename = ''
 with engine.connect() as conn:
     category = pd.read_sql_query(f'select * from portal.portal_item_category where id in ({", ".join(cats)});',conn)
 

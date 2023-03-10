@@ -3,57 +3,15 @@ from bs4 import BeautifulSoup as Soup
 import pandas as pd
 import time
 
-from sqlalchemy import create_engine, inspect
-
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+from commons.mysql import mysqlEngine, loadDataType
+from commons.bs import getSoup
+from commons.selenium import seleniumWindow
 from selenium.webdriver.support.select import Select
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
 
-sql = 'mysql+pymysql'
-host = 
-port = 
-db = 
-user = 
-passwd = 
-
-engine = create_engine(f'{sql}://{user}:{passwd}@{host}/{db}')
-
-def getSoup(url):
-    hdr = {'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.82 Safari/537.36'}
-    response = requests.get(url=url, headers=hdr)
-    if response.status_code!=200:  
-        return response.status_code
-    else:
-        soup = Soup(response.content.decode('utf8','replace'), 'html.parser')
-    return soup
-
-def loadDataType(schema, table):
-    columns = insp.get_columns(table, schema)
-    dtypes = {}
-    for col in columns:
-        dtypes[col['name']] = col['type']
-    return dtypes
-
-insp = inspect(engine)
+engine = mysqlEngine()
 dtypes = loadDataType('portal','alfa_items')
-
-def seleniumWindow(url, headless=True):
-    options = Options()
-    if headless:
-        options.add_argument('--headless')
-    options.add_argument('--mute-audio')
-    options.add_argument('--window-size=1400,2000')
-    options.add_argument('--disable-notifications')
-    options.add_argument('--enable-popup-blocking')
-    driver = webdriver.Chrome(options=options, service=Service(ChromeDriverManager().install()))
-    driver.get(url)
-    return driver
 
 def pageSelect(driver, i):
     select = Select(driver.find_element(By.ID, 'pt1:soc2::content'))
@@ -85,7 +43,7 @@ def findItems(soup):
     return rst
 
 errors = []
-url = 'https://www.alfa.co.kr/AlfaAesarApp/faces/adf.task-flow?adf.tfId=ProductSearchTF&adf.tfDoc=/WEB-INF/ProductSearchTF.xml&pageName=AfAlphabeticalIndex&_afrLoop=502760592284270&_afrWindowMode=0&_afrWindowId=null'
+url = ''
 
 for j in range(20,26):
     driver = seleniumWindow(url, headless=True)
@@ -147,7 +105,7 @@ for j in range(20,26):
                      con=conn
                      )
     except:
-        engine = create_engine(f'{sql}://{user}:{passwd}@{host}/{db}')
+        engine = mysqlEngine()
         with engine.connect() as conn:
             df.to_sql(name='alfa_items',
                      schema='portal',

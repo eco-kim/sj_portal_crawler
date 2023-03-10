@@ -1,31 +1,22 @@
 import pandas as pd
-import boto3
-import json
 
-from sqlalchemy import create_engine
-from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-sql = 'mysql+pymysql'
-host = 
-port = 3306
-db = 
-user = 
-passwd = 
+from commons.mysql import mysqlEngine
+from commons.selenium import seleniumWindow
+from commons.s3 import *
+from commons.config import s3 as s3_config
 
-engine = create_engine(f'{sql}://{user}:{passwd}@{host}/{db}')
+engine = mysqlEngine()
 
-target = 10
+partition = 10
 
 query = f"""select * from
 (select a.url, a.name, a.casno, b.shop from 
 (select * from portal.alfa_items 
-where part = {target}) a
+where part = {partition}) a
 left join portal.portal_item_chemicals b
 on a.url = b.url) c
 where c.shop is null;"""
@@ -33,17 +24,6 @@ where c.shop is null;"""
 with engine.connect() as conn:
     df = pd.read_sql_query(query,conn)
 
-def seleniumWindow(url, headless=True):
-    options = Options()
-    if headless:
-        options.add_argument('--headless')
-    options.add_argument('--mute-audio')
-    options.add_argument('--window-size=1400,2000')
-    options.add_argument('--disable-notifications')
-    options.add_argument('--enable-popup-blocking')
-    driver = webdriver.Chrome(options=options, service=Service(ChromeDriverManager().install()))
-    driver.get(url)
-    return driver
 
 def parse(url):
     driver = seleniumWindow(url, headless=True)
@@ -55,26 +35,10 @@ def parse(url):
     driver.quit()
     return df
 
-accesskey = 
-secretkey = 
-bucket_info = 'portal-item-info'
-
-def s3Client():
-    return boto3.client('s3',aws_access_key_id=accesskey, aws_secret_access_key=secretkey)
-
-def s3Upload(rst, part, num):
-    s3 = s3Client()
-    fname = f'alfa_{str(part).zfill(2)}_{str(num).zfill(4)}.json'
-    temp = {'values':rst}
-    temp = bytes(json.dumps(temp).encode('utf-8'))
-    s3.put_object(
-            Bucket=bucket_info,
-            Key=fname,
-            Body=temp)
-    s3.close()
-
+###기 업로드 된 부분 제외
+shop_name = ''
 s3 = s3Client()
-rst = s3.list_objects(Bucket=bucket_info, Prefix=f'alfa_{str(target).zfill(2)}')
+rst = s3.list_objects(Bucket=s3_config['bucket_info'], Prefix=f'{shop_name}_{str(partition).zfill(2)}')
 keylist = []
 for r in rst['Contents']:
     key = r['Key']
@@ -89,6 +53,7 @@ if len(nums)==0:
 else:
     num = max(nums)+1
 
+##크롤링 시작
 rst = pd.DataFrame()
 j = 0
 for idx, row in df.iterrows():
@@ -108,10 +73,10 @@ for idx, row in df.iterrows():
     if j%30==0:
         print(j)
         rst = rst.to_dict(orient='records')
-        s3Upload(rst, target, num)
+        s3Upload(rst, partition, num)
         num += 1
         del(rst)
         rst = pd.DataFrame()
 
 rst = rst.to_dict(orient='records')
-s3Upload(rst, target, num)
+s3Upload(rst, partition, num)
