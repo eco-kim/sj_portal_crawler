@@ -2,8 +2,9 @@ import airflow
 from airflow import DAG
 from airflow.operators.bash import BashOperator
 from airflow.operators.python import PythonOperator
+from crawl import category
 
-base_dir = "/Users/ecokim/Desktop/work/research_portal_crawler"
+base_dir = ""
 venv = base_dir+'/venv/bin'
 dag=DAG(
     dag_id='portal_crawler',
@@ -11,9 +12,17 @@ dag=DAG(
     schedule_interval=None
 )
 
-crawl_category=BashOperator(
-    task_id="crawl_category",
-    bash_command=f"{venv}/ansible-playbook -i {base_dir}/ansible/hosts {base_dir}/ansible/crawl_category.yml",
+crawl_category = PythonOperator(
+    task_id='category',
+    Python_callable=category,
+    dag=dag
+)
+
+##인스턴스 분배 작업 추가예정
+
+crawl_items = BashOperator(
+    task_id="items",
+    bash_command=f"{venv}/ansible-playbook -i {base_dir}/ansible/hosts {base_dir}/ansible/crawl_items.yml",
     dag=dag
 )
 
@@ -26,4 +35,4 @@ test_func=PythonOperator(
     dag=dag
 )
 
-crawl_category >> test_func
+crawl_category >> crawl_items >> test_func

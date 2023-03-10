@@ -1,8 +1,0 @@
----
-- name: 카테고리 목록 크롤
-  hosts: clients
-  tasks:
-  - name: 스크립트 실행
-    shell: /home/ec2-user/crawl/venv/bin/python3 -u /home/ec2-user/crawl/alfa_options.py
-    register: output
-  - debug: var=output.stdout_lines
